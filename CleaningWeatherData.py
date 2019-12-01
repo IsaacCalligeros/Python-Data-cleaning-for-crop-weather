@@ -9,7 +9,6 @@ import tarfile
 
 yearStart = 1901
 yearEnd = datetime.datetime.now().year
-
 baseDirectory = r'C:\Users\Isaac\source\repos\Python-Play\Datasets\Climate'
 
 
