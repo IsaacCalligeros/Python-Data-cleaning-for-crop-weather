@@ -17,13 +17,36 @@ def distance(lat1, lon1, lat2, lon2):
 def closest(data, v):
     return min(data, key=lambda p: distance(v['lat'],v['lon'],p['lat'],p['lon']))
 
+def get_Weather(date, lat, lon):
+    baseDirectory = r'C:\Users\Isaac\source\repos\Python-Play\Datasets\Climate'
+    path = r'{}\{}\*.csv'.format(baseDirectory, date.year)
+    lat_long = []
+    for fname in glob.glob(path):
+        latitude = float(fname.split("_")[-2])
+        longitude = float(fname.split("_")[-1].split(".csv")[0])
+        lat_long.append({'lat': latitude, 'lon': longitude})
+    v = {'lat': lat, 'lon': lon}
+    print(closest(lat_long, v))
+    closestLocation = closest(lat_long, v)
+    print(distance(v['lat'], v['lon'], closestLocation['lat'], closestLocation['lon']))
+
+    data = pd.read_csv(r'{}\{}\{}_{}_{}.csv'.format(baseDirectory, date.year, date.year,
+     closestLocation['lat'], closestLocation['lon']))
+     
+    date_time_str = date.strftime('%Y-%m-%dT%H:%M:%S')
+
+    print('Date-time:', date_time_str)  
+
+    for index, row in data.iterrows():
+        if(row['DATE'].split("T")[0] == date_time_str.split("T")[0]):
+            print(row['DATE'])
+
 def download_weather_data():
     yearStart = 1901
     yearEnd = datetime.datetime.now().year
     baseDirectory = r'C:\Users\Isaac\source\repos\Python-Play\Datasets\Climate'
 
     for year in range(1901, yearEnd):
-        lat_long = []
         os.makedirs(r'{}\{}'.format(baseDirectory, year), exist_ok=True)
         url = 'https://www.ncei.noaa.gov/data/global-hourly/archive/csv/{}.tar.gz'.format(year)
         filename = url.split("/")[-1]
@@ -45,21 +68,21 @@ def download_weather_data():
                 data = pd.read_csv(r'{}'.format(fname), nrows=1)
                 latitude = data['LATITUDE'].values[0]
                 longitude = data['LONGITUDE'].values[0]
-                lat_long.append({'lat': latitude, 'lon': longitude})
                 try:
                     os.rename(r'{}'.format(fname),
                     r'{}\{}\{}_{}_{}.csv'.format(baseDirectory, year, year, latitude, longitude))
                 except WindowsError:
-                    print('File Already Exists')
+                    FileExistsError
+        
 
-        v = {'lat': 30, 'lon': -50}
-        print(closest(lat_long, v))
+
 
 def main():
     print("Hello World!")
 
 if __name__ == "__main__":
-    download_weather_data()
+    get_Weather(datetime.date(1901, 4, 13), 65, 20)
+    #download_weather_data()
 
 # corr = data.corr()
 # fig = plt.figure()
